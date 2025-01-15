@@ -1,1 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur de Santé</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="text-center mb-5">Calculateur de Santé</h1>
+        
+        <!-- BMI Calculator -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2>Calculateur d'IMC (BMI)</h2>
+            </div>
+            <div class="card-body">
+                <form id="bmiForm" class="mb-3">
+                    <div class="mb-3">
+                        <label for="height-bmi" class="form-label">Taille (cm)</label>
+                        <input type="number" class="form-control" id="height-bmi" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="weight-bmi" class="form-label">Poids (kg)</label>
+                        <input type="number" class="form-control" id="weight-bmi" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Calculer IMC</button>
+                </form>
+                <div id="bmiResult" class="alert alert-info d-none"></div>
+            </div>
+        </div>
 
+        <!-- BMR Calculator -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Calculateur de BMR</h2>
+            </div>
+            <div class="card-body">
+                <form id="bmrForm" class="mb-3">
+                    <div class="mb-3">
+                        <label for="height-bmr" class="form-label">Taille (cm)</label>
+                        <input type="number" class="form-control" id="height-bmr" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="weight-bmr" class="form-label">Poids (kg)</label>
+                        <input type="number" class="form-control" id="weight-bmr" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="age" class="form-label">Âge</label>
+                        <input type="number" class="form-control" id="age" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Genre</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="gender" id="male" value="male" required>
+                            <label class="form-check-label" for="male">Homme</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="gender" id="female" value="female">
+                            <label class="form-check-label" for="female">Femme</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Calculer BMR</button>
+                </form>
+                <div id="bmrResult" class="alert alert-info d-none"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('bmiForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const height = document.getElementById('height-bmi').value;
+            const weight = document.getElementById('weight-bmi').value;
+            
+            try {
+                const response = await fetch('/bmi', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ height, weight })
+                });
+                const data = await response.json();
+                
+                const resultDiv = document.getElementById('bmiResult');
+                if (data.error) {
+                    resultDiv.textContent = `Erreur: ${data.error}`;
+                    resultDiv.classList.remove('alert-info');
+                    resultDiv.classList.add('alert-danger');
+                } else {
+                    resultDiv.textContent = `Votre IMC est: ${data.bmi}`;
+                    resultDiv.classList.remove('alert-danger');
+                    resultDiv.classList.add('alert-info');
+                }
+                resultDiv.classList.remove('d-none');
+            } catch (error) {
+                console.error('Erreur:', error);
+            }
+        });
+
+        document.getElementById('bmrForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const height = document.getElementById('height-bmr').value;
+            const weight = document.getElementById('weight-bmr').value;
+            const age = document.getElementById('age').value;
+            const gender = document.querySelector('input[name="gender"]:checked').value;
+            
+            try {
+                const response = await fetch('/bmr', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ height, weight, age, gender })
+                });
+                const data = await response.json();
+                
+                const resultDiv = document.getElementById('bmrResult');
+                if (data.error) {
+                    resultDiv.textContent = `Erreur: ${data.error}`;
+                    resultDiv.classList.remove('alert-info');
+                    resultDiv.classList.add('alert-danger');
+                } else {
+                    resultDiv.textContent = `Votre BMR est: ${data.bmr} calories`;
+                    resultDiv.classList.remove('alert-danger');
+                    resultDiv.classList.add('alert-info');
+                }
+                resultDiv.classList.remove('d-none');
+            } catch (error) {
+                console.error('Erreur:', error);
+            }
+        });
+    </script>
+</body>
+</html>
