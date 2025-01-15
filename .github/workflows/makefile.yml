@@ -8,20 +8,26 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - name: checkout
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-    - name: python install
+    - name: Set up Python
       uses: actions/setup-python@v2
-      with: 
+      with:
         python-version: '3.x'
 
     - name: Install dependencies
       run: make
+
+    - name: Run check
+      run: make check
+
+    - name: Run distcheck
+      run: make distcheck
+
 
     - name: Run check
       run: make check
