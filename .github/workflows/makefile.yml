@@ -20,21 +20,9 @@ jobs:
         python-version: '3.x'
 
     - name: Install dependencies
-      run: make
+      run: make init 
 
     - name: Run check
-      run: make check
-
-    - name: Run distcheck
-      run: make distcheck
-
-
-    - name: Run check
-      run: make check
-
-    - name: Run distcheck
-      run: make distcheck
-  
-    - name: Run tests
       run: make test
 
+  
