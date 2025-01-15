@@ -4,7 +4,7 @@ init:
 run:
 	python app.py
 
-test:
+test1:
 	python -m unittest test.py
 
 # Nom de l'image Docker
@@ -30,7 +30,7 @@ stop:
 	docker rm $(CONTAINER_NAME)
 
 # Commande pour exécuter les tests unitaires dans un environnement Docker
-test:
+test2:
 	docker run --rm $(IMAGE_NAME) python3 -m unittest test.py
 
 # Commande pour nettoyer les images Docker inutilisées
