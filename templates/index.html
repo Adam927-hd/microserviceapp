@@ -20,11 +20,11 @@
                 <form id="bmiForm" class="mb-3">
                     <div class="mb-3">
                         <label for="height-bmi" class="form-label">Taille (cm)</label>
-                        <input type="number" class="form-control" id="height-bmi" required>
+                        <input type="number" class="form-control" id="height-bmi" step="0.01" min="1" required>
                     </div>
                     <div class="mb-3">
                         <label for="weight-bmi" class="form-label">Poids (kg)</label>
-                        <input type="number" class="form-control" id="weight-bmi" required>
+                        <input type="number" class="form-control" id="weight-bmi" step="0.1" min="1" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Calculer IMC</button>
                 </form>
@@ -41,15 +41,15 @@
                 <form id="bmrForm" class="mb-3">
                     <div class="mb-3">
                         <label for="height-bmr" class="form-label">Taille (cm)</label>
-                        <input type="number" class="form-control" id="height-bmr" required>
+                        <input type="number" class="form-control" id="height-bmr" step="0.01" min="1" required>
                     </div>
                     <div class="mb-3">
                         <label for="weight-bmr" class="form-label">Poids (kg)</label>
-                        <input type="number" class="form-control" id="weight-bmr" required>
+                        <input type="number" class="form-control" id="weight-bmr" step="0.1" min="1" required>
                     </div>
                     <div class="mb-3">
                         <label for="age" class="form-label">Âge</label>
-                        <input type="number" class="form-control" id="age" required>
+                        <input type="number" class="form-control" id="age" min="1" max="150" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Genre</label>
@@ -72,40 +72,64 @@
     <script>
         document.getElementById('bmiForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const height = document.getElementById('height-bmi').value;
-            const weight = document.getElementById('weight-bmi').value;
+            // Conversion de la taille de cm en mètres
+            const heightInMeters = parseFloat(document.getElementById('height-bmi').value) / 100;
+            const weight = parseFloat(document.getElementById('weight-bmi').value);
             
             try {
                 const response = await fetch('/bmi', {
-                    method: 'GET',
+                    method: 'POST', // Changé de GET à POST pour correspondre à votre route
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ height, weight })
+                    body: JSON.stringify({
+                        height: heightInMeters,
+                        weight: weight
+                    })
                 });
-                const data = await response.json();
                 
+                const data = await response.json();
                 const resultDiv = document.getElementById('bmiResult');
+                
                 if (data.error) {
                     resultDiv.textContent = `Erreur: ${data.error}`;
                     resultDiv.classList.remove('alert-info');
                     resultDiv.classList.add('alert-danger');
                 } else {
-                    resultDiv.textContent = `Votre IMC est: ${data.bmi}`;
+                    // Ajout de l'interprétation de l'IMC
+                    let interpretation = '';
+                    const bmi = data.bmi;
+                    if (bmi < 18.5) {
+                        interpretation = ' - Insuffisance pondérale';
+                    } else if (bmi < 25) {
+                        interpretation = ' - Poids normal';
+                    } else if (bmi < 30) {
+                        interpretation = ' - Surpoids';
+                    } else {
+                        interpretation = ' - Obésité';
+                    }
+                    
+                    resultDiv.textContent = `Votre IMC est: ${bmi}${interpretation}`;
                     resultDiv.classList.remove('alert-danger');
                     resultDiv.classList.add('alert-info');
                 }
                 resultDiv.classList.remove('d-none');
             } catch (error) {
                 console.error('Erreur:', error);
+                const resultDiv = document.getElementById('bmiResult');
+                resultDiv.textContent = "Une erreur est survenue lors du calcul.";
+                resultDiv.classList.remove('alert-info');
+                resultDiv.classList.add('alert-danger');
+                resultDiv.classList.remove('d-none');
             }
         });
 
         document.getElementById('bmrForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const height = document.getElementById('height-bmr').value;
-            const weight = document.getElementById('weight-bmr').value;
-            const age = document.getElementById('age').value;
+            // Conversion de la taille de cm en mètres
+            const heightInMeters = parseFloat(document.getElementById('height-bmr').value) / 100;
+            const weight = parseFloat(document.getElementById('weight-bmr').value);
+            const age = parseInt(document.getElementById('age').value);
             const gender = document.querySelector('input[name="gender"]:checked').value;
             
             try {
@@ -114,23 +138,34 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ height, weight, age, gender })
+                    body: JSON.stringify({
+                        height: heightInMeters,
+                        weight: weight,
+                        age: age,
+                        gender: gender
+                    })
                 });
-                const data = await response.json();
                 
+                const data = await response.json();
                 const resultDiv = document.getElementById('bmrResult');
+                
                 if (data.error) {
                     resultDiv.textContent = `Erreur: ${data.error}`;
                     resultDiv.classList.remove('alert-info');
                     resultDiv.classList.add('alert-danger');
                 } else {
-                    resultDiv.textContent = `Votre BMR est: ${data.bmr} calories`;
+                    resultDiv.textContent = `Votre métabolisme de base (BMR) est: ${data.bmr} calories par jour`;
                     resultDiv.classList.remove('alert-danger');
                     resultDiv.classList.add('alert-info');
                 }
                 resultDiv.classList.remove('d-none');
             } catch (error) {
                 console.error('Erreur:', error);
+                const resultDiv = document.getElementById('bmrResult');
+                resultDiv.textContent = "Une erreur est survenue lors du calcul.";
+                resultDiv.classList.remove('alert-info');
+                resultDiv.classList.add('alert-danger');
+                resultDiv.classList.remove('d-none');
             }
         });
     </script>
